@@ -3,14 +3,14 @@
 import joblib
 import librosa
 import numpy as np
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Form
 from typing import Annotated
 
 from fastapi.middleware.cors import CORSMiddleware
 
 # Load trained model + scaler
-model = joblib.load("model_files/model_knn.pkl")
-scaler = joblib.load("model_files/scaler.pkl")
+# model = joblib.load("model_files/model_knn.pkl")
+# scaler = joblib.load("model_files/scaler.pkl")
 
 ALLOWED_ORIGINS = [
     "http://localhost",
@@ -42,24 +42,27 @@ def extract_features(file_path):
     return np.hstack([mfcc_mean, centroid, zcr, chroma_mean]).reshape(1, -1)
 
 
-file_path = "audio.wav"
+# file_path = "audio.wav"
 
-features = extract_features(file_path)
-features_scaled = scaler.transform(features)
+# features = extract_features(file_path)
+# features_scaled = scaler.transform(features)
 
-prediction = model.predict(features_scaled)[0]
-print("\nPredicted Genre:", prediction)
+# prediction = model.predict(features_scaled)[0]
+# print("\nPredicted Genre:", prediction)
 
 
 
 @app.post('/api/testaudio')
-async def test_audio(audio_file: Annotated[UploadFile, File()]):
+async def test_audio(audio_file: Annotated[UploadFile, File()],model_type: Annotated[str, Form(...)]):
     with open("audio.wav", "wb") as f:
         content = await audio_file.read()
         f.write(content)
     
+    print(f"loading model {model_type}")
+
+    model = joblib.load(f"model_files/model_{model_type}.pkl")
+    scaler = joblib.load(f"model_files/scaler.pkl")
     
-        
     features = extract_features("audio.wav")
     features_scaled = scaler.transform(features)
 
