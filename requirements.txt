@@ -3,3 +3,4 @@ joblib
 librosa
 fastapi
 scikit-learn
+uvicorn
